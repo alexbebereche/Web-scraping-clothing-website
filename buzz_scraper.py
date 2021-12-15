@@ -1,5 +1,7 @@
 import requests
 import bs4
+import os
+from dotenv import load_dotenv
 
 """
 csv file structure:
@@ -13,9 +15,10 @@ email must be gmail
 website: https://www.buzzsneakers.com/RON_ro
 """
 
+load_dotenv()
 FILE_PATH = f'G:\\bs-buzzsneakers\\products.csv'
-EMAIL_ADDRESS = ""
-PASSWORD = ""
+EMAIL_ADDRESS = os.getenv("EMAIL")
+PASSWORD = os.getenv("PWD")
 
 # TODO: validation for from_ to be email
 def send_mail(from_, to, password, my_list):
@@ -65,11 +68,17 @@ def main():
         res = requests.get(f'{link}')
         soup = bs4.BeautifulSoup(res.text, "html.parser")
         
-        price = soup.find('span',{'class':'product-price-value value'}).get_text().strip()
-        price = float(price.replace(",", "."))  # cast from string
-        if price <= float(dict[link]):
-            tobuy_list.append(link)
-    
+        try:
+            price = soup.find('span',{'class':'product-price-value value'}).get_text().strip()
+            price = float(price.replace(",", "."))  # cast from string
+            if price <= float(dict[link]):
+                tobuy_list.append(link)
+        except AttributeError as ae:
+
+            print(f"Product {link} not available at the moment.")
+        print(link)
+
+
     dlist = list(dict)
     index_list = []
     for prod in dlist:
